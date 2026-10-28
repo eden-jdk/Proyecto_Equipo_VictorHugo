@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
-public class PlantillaICPC {
+public class PlantillaCPM {
 
     FastReader reader = new FastReader();
     int n; // Número de tareas
@@ -135,7 +135,7 @@ public class PlantillaICPC {
     }
 
     public static void main(String[] args) {
-        PlantillaICPC solver = new PlantillaICPC();
+        PlantillaCPM solver = new PlantillaCPM();
         solver.leerDatos();
         solver.resuelve();
     }   
