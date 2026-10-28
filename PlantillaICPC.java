@@ -91,7 +91,7 @@ public class PlantillaICPC {
     }
 
     public void resuelve() {
-        // 1. FORWARD PASS (Cálculo de Early Start y Early Finish)
+        // FORWARD PASS (Cálculo de Early Start y Early Finish)
         int projectDuration = 0;
         
         for (int i = 0; i < n; i++) {
@@ -105,7 +105,7 @@ public class PlantillaICPC {
             projectDuration = Math.max(projectDuration, t.earlyFinish);
         }
 
-        // 2. BACKWARD PASS (Cálculo de Late Finish y Late Start)
+        // BACKWARD PASS (Cálculo de Late Finish y Late Start)
         for (int i = n - 1; i >= 0; i--) {
             Task t = tasks[i];
             if (t.successors.isEmpty()) {
@@ -121,7 +121,7 @@ public class PlantillaICPC {
             t.slack = t.lateStart - t.earlyStart;
         }
 
-        // 3. RESULTADOS Y RUTA CRÍTICA
+        // RESULTADOS Y RUTA CRÍTICA
         System.out.println("Duración total del proyecto: " + projectDuration);
         System.out.print("Ruta Crítica (Tareas con holgura 0): ");
         
