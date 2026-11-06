@@ -1,5 +1,3 @@
-// Actualizacion del trabajo de Emily
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -113,8 +111,11 @@ public class PlantillaCPM {
         }
     }
 
+    //Cambioooooooooooo
+    // Método para resolver el CPM y calcular los tiempos de inicio y fin tempranos y tardíos, así como la holgura
+
     public void resuelve() {
-        // Segun lei, aqui se lee y se mapea el orden de las tareas
+        // Aqui se pide el orden topológico de las tareas para asegurar que no haya ciclos en el grafo de dependencias
         List<Integer> topoOrder = obtenerOrdenTopologico();
         
         if (topoOrder.size() < n) {
@@ -122,7 +123,7 @@ public class PlantillaCPM {
             return;
         }
 
-        // Implementacion de la Forward pass
+        // Forward Pass calculando Early Start y Early Finish
         double projectDuration = 0;
 
         for (int i : topoOrder) {
@@ -136,7 +137,7 @@ public class PlantillaCPM {
             projectDuration = Math.max(projectDuration, t.earlyFinish);
         }
 
-        // Backward pass
+        // Backward Pass calculando Late Start y Late Finish
         for (int i = topoOrder.size() - 1; i >= 0; i--) {
             int taskId = topoOrder.get(i);
             Task t = tasks[taskId];
@@ -152,32 +153,50 @@ public class PlantillaCPM {
             }
             t.lateStart = t.lateFinish - t.tiempoEsp;
             t.slack = t.lateStart - t.earlyStart;
-            // Redondeo opcional que alchile gemini me dijo que usara
+            
             if (Math.abs(t.slack) < 1e-7) {
                 t.slack = 0;
             }
         }
 
-        // 4. RESULTADOS Y RUTA CRÍTICA
-        System.out.printf("Duración total esperada del proyecto: %.4f\n", projectDuration);
-        
+        // Impresion de resultados
+        // Esto alchile si conviene mas pedirle a una IA que te lo haga
+
+        System.out.println("\n==================================================================");
+        System.out.println("                   RESULTADOS DETALLADOS CPM/PERT                 ");
+        System.out.println("==================================================================");
+        System.out.printf("%-6s | %-8s | %-6s | %-6s | %-6s | %-6s | %-6s | %-8s\n", 
+                          "Tarea", "Te(Esp)", "ES", "EF", "LS", "LF", "Holgura", "Critica?");
+        System.out.println("------------------------------------------------------------------");
+
         List<Integer> criticalPath = new ArrayList<>();
         double projectVariance = 0;
 
         for (int i = 0; i < n; i++) {
-            if (tasks[i].slack == 0) {
+            Task t = tasks[i];
+            boolean isCritical = (t.slack == 0);
+            if (isCritical) {
                 criticalPath.add(i);
-                projectVariance += tasks[i].varianza; // Sumamos varianzas de la ruta crítica
+                projectVariance += t.varianza;
             }
+            
+            System.out.printf("T%-5d | %-8.2f | %-6.2f | %-6.2f | %-6.2f | %-6.2f | %-6.2f | %-8s\n",
+                              t.id, t.tiempoEsp, t.earlyStart, t.earlyFinish, 
+                              t.lateStart, t.lateFinish, t.slack, isCritical ? "Si" : "No");
         }
-
-        System.out.print("Ruta Crítica (Tareas con holgura 0): ");
-        System.out.println(criticalPath);
+        System.out.println("==================================================================");
+        System.out.printf("Duracion total esperada del proyecto: %.4f\n", projectDuration);
+        System.out.print("Ruta Critica: ");
+        for (int i = 0; i < criticalPath.size(); i++) {
+            System.out.print("T" + criticalPath.get(i) + (i < criticalPath.size() - 1 ? " -> " : ""));
+        }
+        System.out.println();
         System.out.printf("Varianza total del proyecto: %.4f\n", projectVariance);
-        System.out.printf("Desviación estándar del proyecto: %.4f\n", Math.sqrt(projectVariance));
+        System.out.printf("Desviacion estandar del proyecto: %.4f\n", Math.sqrt(projectVariance));
+        System.out.println("==================================================================\n");
     }
 
-    // Método Método para ordenar el grafo; Algoritmo de Kahn para orden topológico
+    // Método para ordenar el grafo; Algoritmo de Kahn para orden topológico
     private List<Integer> obtenerOrdenTopologico() {
         int[] inDegree = new int[n];
         for (int i = 0; i < n; i++) {
