@@ -14,7 +14,6 @@ public class PlantillaCPM {
     // Estructura para representar cada tarea del proyecto
     static class Task {
         int id;
-        int duration;
 
         // agregué o, m, p, tiempo esperado y varianza, cambie los datos s double por si
         // spawnea algún decimal
@@ -27,15 +26,14 @@ public class PlantillaCPM {
         List<Integer> predecessors = new ArrayList<>();
         List<Integer> successors = new ArrayList<>();
 
-        int earlyStart = 0;
-        int earlyFinish = 0;
-        int lateStart = 0;
-        int lateFinish = 0;
-        int slack = 0;
+        double earlyStart = 0.0;
+        double earlyFinish = 0.0;
+        double lateStart = 0.0;
+        double lateFinish = 0.0;
+        double slack = 0.0;
 
-        public Task(int id, int duration, double optimista, double masProbable, double pesimista) {
+        public Task(int id, double optimista, double masProbable, double pesimista) {
             this.id = id;
-            this.duration = duration;
             this.optimista = optimista;
             this.masProbable = masProbable;
             this.pesimista = pesimista;
@@ -97,11 +95,10 @@ public class PlantillaCPM {
 
         // leer la duración y tiempos de cada tarea
         for (int i = 0; i < n; i++) {
-            int duration = reader.nextInt();
             double o = reader.nextDouble();
             double m = reader.nextDouble();
             double p = reader.nextDouble();
-            tasks[i] = new Task(i, duration, o, m, p);
+            tasks[i] = new Task(i, o, m, p);
         }
 
         // Leer dependencias (predecesores para cada tarea)
@@ -117,16 +114,16 @@ public class PlantillaCPM {
 
     public void resuelve() {
         // FORWARD PASS (Cálculo de Early Start y Early Finish)
-        int projectDuration = 0;
+        double projectDuration = 0.0;
 
         for (int i = 0; i < n; i++) {
             Task t = tasks[i];
-            int maxPredecessorEF = 0;
+            double maxPredecessorEF = 0.0;
             for (int predId : t.predecessors) {
                 maxPredecessorEF = Math.max(maxPredecessorEF, tasks[predId].earlyFinish);
             }
             t.earlyStart = maxPredecessorEF;
-            t.earlyFinish = t.earlyStart + t.duration;
+            t.earlyFinish = t.earlyStart + t.tiempoEsp;
             projectDuration = Math.max(projectDuration, t.earlyFinish);
         }
 
@@ -136,13 +133,13 @@ public class PlantillaCPM {
             if (t.successors.isEmpty()) {
                 t.lateFinish = projectDuration;
             } else {
-                int minSuccessorLS = Integer.MAX_VALUE;
+                double minSuccessorLS = Double.MAX_VALUE;
                 for (int succId : t.successors) {
                     minSuccessorLS = Math.min(minSuccessorLS, tasks[succId].lateStart);
                 }
                 t.lateFinish = minSuccessorLS;
             }
-            t.lateStart = t.lateFinish - t.duration;
+            t.lateStart = t.lateFinish - t.tiempoEsp;
             t.slack = t.lateStart - t.earlyStart;
         }
 
